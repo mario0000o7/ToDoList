@@ -2,67 +2,96 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ZdanieItem">
+    android:layout_height="wrap_content"
+    android:background="#9CCD40"
+    tools:context=".ZadanieItem">
 
-    <TableLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Zrobienie pracy domowej" />
+                android:id="@+id/taskTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:text="z"
+                android:textSize="48sp" />
 
-            <TextView
-                android:id="@+id/textView9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Nauka" />
-        </TableRow>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="end"
+                android:orientation="vertical">
 
-        <TableRow
+                <TextView
+                    android:id="@+id/taskDateTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="09.05.2023"
+                    android:textAlignment="textEnd"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/taskTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="17:30"
+                    android:textAlignment="textEnd"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/taskCategory"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="wrap_content"
+            android:text="Nauka"
+            android:textSize="24sp" />
 
-            <TextView
-                android:id="@+id/textView13"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="3:55" />
-        </TableRow>
-
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="end">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <CheckBox
-                android:id="@+id/checkBox"
-                android:layout_width="wrap_content"
+                android:id="@+id/taskNotificationCheckBox"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:checked="false"
+                android:clickable="false"
+                android:text="Powiadomienia" />
+
+            <CheckBox
+                android:id="@+id/taskAttachmentCheckBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:checked="false"
                 android:clickable="false"
                 android:text="Załączniki" />
-        </TableRow>
+        </LinearLayout>
 
-        <TableRow
+        <CheckBox
+            android:id="@+id/taskStatusCheckBox"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="end">
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:clickable="false"
+            android:text="Zakończone" />
 
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edytuj" />
-        </TableRow>
-    </TableLayout>
+    </LinearLayout>
+
 </FrameLayout>

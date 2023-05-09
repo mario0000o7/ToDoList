@@ -66,9 +66,13 @@
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/taskList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="3">
+            android:layout_weight="3"
+            android:background="#38CCAD"
+            tools:itemCount="7"
+            tools:listitem="@layout/fragment_zdanie_item">
 
         </androidx.recyclerview.widget.RecyclerView>
 

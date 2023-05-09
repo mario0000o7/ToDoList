@@ -8,6 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Date;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link Zadanie#newInstance} factory method to
@@ -17,15 +22,33 @@ public class Zadanie extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    String taskTitle="Brak tytułu";
+    String taskDescription="Brak opisu";
+    Date taskDate=new Date();
+    Time taskTime=new Time(0,0,0);
+    int taskPriority=0;
+    boolean taskDone=false;
+    boolean taskNotification=false;
+    boolean taskAttachment=false;
+    String taskCategory="Brak kategorii";
+    ArrayList<File> taskFiles=new ArrayList<>();
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+
 
     public Zadanie() {
         // Required empty public constructor
+    }
+
+    public Zadanie(String taskTitle, String taskDescription,String taskCategory ,Date taskDate, Time taskTime, boolean taskDone, boolean taskNotification,boolean taskAttachment) {
+        this.taskTitle = taskTitle;
+        this.taskDescription = taskDescription;
+        this.taskDate = taskDate;
+        this.taskTime = taskTime;
+        this.taskDone = taskDone;
+        this.taskNotification = taskNotification;
+        this.taskAttachment = taskAttachment;
+        this.taskCategory = taskCategory;
+
     }
 
     /**
@@ -40,8 +63,7 @@ public class Zadanie extends Fragment {
     public static Zadanie newInstance(String param1, String param2) {
         Zadanie fragment = new Zadanie();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,10 +71,7 @@ public class Zadanie extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
@@ -60,5 +79,41 @@ public class Zadanie extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_zadanie, container, false);
+    }
+
+    public Date getTaskDate() {
+        return taskDate;
+    }
+
+    public int getTaskPriority() {
+        return taskPriority;
+    }
+
+    public String getTaskCategory() {
+        return taskCategory;
+    }
+
+    public String getTaskDescription() {
+        return taskDescription;
+    }
+
+    public String getTaskTitle() {
+        return taskTitle;
+    }
+
+    public Time getTaskTime() {
+        return taskTime;
+    }
+    public boolean getTaskDone() {
+        return taskDone;
+    }
+    public boolean getTaskNotification() {
+        return taskNotification;
+    }
+    public boolean getTaskAttachment() {
+        return taskAttachment;
+    }
+    public ArrayList<File> getTaskFiles() {
+        return taskFiles;
     }
 }

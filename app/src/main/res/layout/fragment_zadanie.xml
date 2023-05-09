@@ -16,13 +16,13 @@
             android:layout_weight="2">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/taskTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tytuł:" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/taskTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -35,13 +35,13 @@
             android:layout_weight="5">
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/taskDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Opis:" />
 
             <TextView
-                android:id="@+id/textView7"
+                android:id="@+id/taskDescriptionText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -54,13 +54,13 @@
             android:layout_weight="2">
 
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/taskDateTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Czas utworzenia:" />
 
             <TextView
-                android:id="@+id/textView10"
+                android:id="@+id/taskDate"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -75,13 +75,13 @@
             android:layout_weight="2">
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/taskTimeTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Czas wykonania:" />
 
             <TextView
-                android:id="@+id/textView12"
+                android:id="@+id/taskTime"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -95,7 +95,7 @@
             android:layout_weight="2">
 
             <TextView
-                android:id="@+id/textView17"
+                android:id="@+id/taskStatusTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Status" />
