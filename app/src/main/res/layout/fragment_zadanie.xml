@@ -170,12 +170,15 @@
                 android:text="Załączniki:" />
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/attachmentsList"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
 
+                android:layout_height="match_parent"
                 android:layout_weight="2"
+                android:background="#BA5B5B"
                 android:scrollbars="horizontal"
-                tools:itemCount="3" />
+                tools:itemCount="3"
+                tools:listitem="@layout/fragment_photo" />
         </LinearLayout>
 
     </LinearLayout>
@@ -186,7 +189,7 @@
         android:layout_weight="1">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton3"
+            android:id="@+id/floatingActionButtonSave"
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:clickable="true"
@@ -195,13 +198,22 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton2"
+            android:id="@+id/floatingActionButtonCancel"
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:clickable="true"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/floatingActionButton3" />
+            app:layout_constraintEnd_toStartOf="@+id/floatingActionButtonSave" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButtonUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:clickable="true"
+            android:src="@android:drawable/ic_menu_upload"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

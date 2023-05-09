@@ -1,14 +1,26 @@
 package com.example.todolist;
 
+import static android.app.Activity.RESULT_OK;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -23,6 +35,10 @@ import java.util.Date;
  * create an instance of this fragment.
  */
 public class Zadanie extends Fragment {
+    private static final int REQUEST_CODE_PICK_IMAGE = 1;
+    private static final int REQUEST_CODE_SAVE_IMAGE = 2;
+    private static final int REQUEST_CODE_PICK_FILE = 1;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -36,6 +52,9 @@ public class Zadanie extends Fragment {
     boolean taskAttachment=false;
     String taskCategory="Brak kategorii";
     ArrayList<File> taskFiles=new ArrayList<>();
+    private MainActivity mainActivity;
+    RecyclerView attachmentRecyclerView;
+    AttachmentListAdapter attachmentAdapter;
 
 
 
@@ -43,7 +62,19 @@ public class Zadanie extends Fragment {
         // Required empty public constructor
     }
 
-    public Zadanie(String taskTitle, String taskDescription,String taskCategory ,Date taskDate, Time taskTime, boolean taskDone, boolean taskNotification,boolean taskAttachment) {
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mainActivity = (MainActivity) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mainActivity = null;
+    }
+
+    public Zadanie(String taskTitle, String taskDescription, String taskCategory , Date taskDate, Time taskTime, boolean taskDone, boolean taskNotification, boolean taskAttachment) {
         this.taskTitle = taskTitle;
         this.taskDescription = taskDescription;
         this.taskDate = taskDate;
@@ -53,6 +84,16 @@ public class Zadanie extends Fragment {
         this.taskAttachment = taskAttachment;
         this.taskCategory = taskCategory;
 
+    }
+    private void pickFile() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*"); // Set MIME type to allow any file type
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, REQUEST_CODE_PICK_FILE);
+    }
+    private void pickImageFromLibrary() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
     }
 
     /**
@@ -88,11 +129,27 @@ public class Zadanie extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        FloatingActionButton fabCancel=view.findViewById(R.id.floatingActionButton2);
+        FloatingActionButton fabCancel=view.findViewById(R.id.floatingActionButtonCancel);
+        attachmentRecyclerView = view.findViewById(R.id.attachmentsList);
+        attachmentAdapter = new AttachmentListAdapter(mainActivity);
+        attachmentRecyclerView.setAdapter(attachmentAdapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivity);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
+        attachmentRecyclerView.setLayoutManager(layoutManager);
         fabCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new MainActivityFragment()).commit();
+            }
+        });
+        FloatingActionButton fabUpload = view.findViewById(R.id.floatingActionButtonUpload);
+        fabUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
+
             }
         });
 
@@ -132,5 +189,29 @@ public class Zadanie extends Fragment {
     }
     public ArrayList<File> getTaskFiles() {
         return taskFiles;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+        if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            Uri selectedImage = data.getData();
+            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+
+            Cursor cursor = getActivity().getContentResolver().query(selectedImage,
+                    filePathColumn, null, null, null);
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            cursor.close();
+
+            Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
+            attachmentAdapter.addPhoto(new PhotoFragment(bitmap));
+
+
+        }
     }
 }
