@@ -31,7 +31,7 @@ public class MyListAdapter extends RecyclerView.Adapter<ItemZadaniaViewHolder>{
     }
     public void addZadanie(Zadanie zadanie){
         zadania.add(zadanie);
-        notifyDataSetChanged();
+        notifyItemInserted(zadania.size()-1);
     }
 
     @Override

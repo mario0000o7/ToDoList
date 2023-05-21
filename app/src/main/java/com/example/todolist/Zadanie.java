@@ -2,6 +2,7 @@ package com.example.todolist;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,10 +14,13 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentContainerView;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,14 +57,17 @@ public class Zadanie extends Fragment {
     String taskCategory="Brak kategorii";
     ArrayList<File> taskFiles=new ArrayList<>();
     private MainActivity mainActivity;
-    RecyclerView attachmentRecyclerView;
-    AttachmentListAdapter attachmentAdapter;
+    MyListAdapter adapter;
 
 
 
     public Zadanie() {
         // Required empty public constructor
     }
+    public Zadanie(MyListAdapter adapter){
+        this.adapter=adapter;
+    }
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -114,29 +121,34 @@ public class Zadanie extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Activity activity) {
+        super.onAttach(activity);
+        Log.println(Log.INFO,"Zadanie","onAttach");
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.println(Log.INFO,"Zadanie","onCreate");
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.println(Log.INFO,"Zadanie","onCreateView");
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_zadanie, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Log.println(Log.INFO,"Zadanie","onViewCreated");
         super.onViewCreated(view, savedInstanceState);
         FloatingActionButton fabCancel=view.findViewById(R.id.floatingActionButtonCancel);
-        attachmentRecyclerView = view.findViewById(R.id.attachmentsList);
-        attachmentAdapter = new AttachmentListAdapter(mainActivity);
-        attachmentRecyclerView.setAdapter(attachmentAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivity);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
-        attachmentRecyclerView.setLayoutManager(layoutManager);
         fabCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -152,7 +164,14 @@ public class Zadanie extends Fragment {
 
             }
         });
-
+        FloatingActionButton fabSave = view.findViewById(R.id.floatingActionButtonSave);
+        fabSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                adapter.addZadanie(new Zadanie(taskTitle,taskDescription,taskCategory,taskDate,taskTime,taskDone,taskNotification,taskAttachment));
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new MainActivityFragment()).commit();
+            }
+        });
     }
 
     public Date getTaskDate() {
@@ -209,7 +228,11 @@ public class Zadanie extends Fragment {
             cursor.close();
 
             Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
-            attachmentAdapter.addPhoto(new PhotoFragment(bitmap));
+            FragmentContainerView attachmentFragmentContainerView = getView().findViewById(R.id.attachmentContainerView);
+            attachmentFragmentContainerView.setVisibility(View.VISIBLE);
+            PhotoFragment ph=new PhotoFragment(bitmap);
+
+            getActivity().getSupportFragmentManager().beginTransaction().replace(attachmentFragmentContainerView.getId(), ph).commit();
 
 
         }

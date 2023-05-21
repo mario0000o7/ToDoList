@@ -74,9 +74,6 @@ public class MainActivityFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         MyListAdapter listAdapter = new MyListAdapter(mainActivity);
-        listAdapter.addZadanie(new Zadanie("z","cos tam","Nauka", new Date(),new Time(12,12,120),true,false,false));
-        listAdapter.addZadanie(new Zadanie("z","cos tam","Nauka", new Date(),new Time(12,12,12),false,true,false));
-        listAdapter.addZadanie(new Zadanie("sadasdsadsadasdsa sadsadasdsadads","cos tam","Nauka", new Date(),new Time(12,12,12),false,false,true));
         RecyclerView taskList = view.findViewById(R.id.taskList);
         taskList.setAdapter(listAdapter);
         taskList.setLayoutManager(new LinearLayoutManager(mainActivity));
@@ -93,7 +90,8 @@ public class MainActivityFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new Zadanie()).commit();
+
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new Zadanie(listAdapter)).commit();
             }
         });
 

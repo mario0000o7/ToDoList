@@ -160,6 +160,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="start"
             android:orientation="horizontal">
 
             <TextView
@@ -169,16 +170,15 @@
                 android:layout_weight="8"
                 android:text="Załączniki:" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/attachmentsList"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/attachmentContainerView"
+                android:name="com.example.todolist.PhotoFragment"
                 android:layout_width="match_parent"
-
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:background="#BA5B5B"
-                android:scrollbars="horizontal"
-                tools:itemCount="3"
-                tools:listitem="@layout/fragment_photo" />
+                android:visibility="invisible"
+                tools:layout="@layout/fragment_photo" />
+
         </LinearLayout>
 
     </LinearLayout>
