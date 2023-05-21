@@ -2,6 +2,7 @@ package com.example.todolist;
 
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,6 +24,8 @@ public class ItemZadaniaViewHolder extends RecyclerView.ViewHolder {
     private CheckBox attachment;
     private CheckBox notification;
     private MainActivity mainActivity;
+    private MyListAdapter myListAdapter;
+    private int position;
     public ItemZadaniaViewHolder(@NonNull View itemView, MainActivity mainActivity) {
         super(itemView);
         taskTitle = itemView.findViewById(R.id.taskTitle);
@@ -39,10 +42,24 @@ public class ItemZadaniaViewHolder extends RecyclerView.ViewHolder {
 
 
 
+
     }
 
+    public void setMyListAdapter(MyListAdapter myListAdapter) {
+        this.myListAdapter = myListAdapter;
+        FrameLayout mainFrame = itemView.findViewById(R.id.mainFrame);
+        mainFrame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainActivity.getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,myListAdapter.getZadanie(position)).commit();
 
+            }
+        });
+    }
 
+    public void setPosition(int position) {
+        this.position = position;
+    }
 
     public void setMainActivity(MainActivity mainActivity){
         this.mainActivity = mainActivity;

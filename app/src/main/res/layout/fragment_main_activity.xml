@@ -34,7 +34,7 @@
                 </SearchView>
 
                 <Switch
-                    android:id="@+id/switch1"
+                    android:id="@+id/switchDone"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="4"

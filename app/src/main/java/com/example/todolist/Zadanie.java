@@ -3,6 +3,8 @@ package com.example.todolist;
 import static android.app.Activity.RESULT_OK;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,24 +16,31 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentContainerView;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -58,6 +67,10 @@ public class Zadanie extends Fragment {
     ArrayList<File> taskFiles=new ArrayList<>();
     private MainActivity mainActivity;
     MyListAdapter adapter;
+    String photoPath="";
+    Bitmap photoBitmap=null;
+    PendingIntent pendingIntentNotification;
+    private int notificationID;
 
 
 
@@ -73,6 +86,27 @@ public class Zadanie extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mainActivity = (MainActivity) context;
+    }
+
+    public void sendNotification(){
+        Log.d("Zadanie", "sendNotification: "+taskTitle+mainActivity.toString());
+        Intent notificationIntent = new Intent(mainActivity, NotificationReceiver.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notificationIntent.putExtra("Title", taskTitle);
+        notificationIntent.putExtra("Message", "Zadanie z kategorii: "+taskCategory+" o terminie: "+taskDate+" "+taskTime);
+        notificationID=UUID.randomUUID().hashCode();
+        notificationIntent.putExtra("ID",  notificationID);
+        pendingIntentNotification = PendingIntent.getBroadcast(
+                mainActivity,
+                notificationID,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        AlarmManager alarmManager = (AlarmManager) mainActivity.getSystemService(Context.ALARM_SERVICE);
+        long time = taskDate.getTime() + taskTime.getTime();
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntentNotification);
+
     }
 
     @Override
@@ -91,6 +125,30 @@ public class Zadanie extends Fragment {
         this.taskAttachment = taskAttachment;
         this.taskCategory = taskCategory;
 
+    }
+    public Zadanie(String taskTitle, String taskDescription, String taskCategory , Date taskDate, Time taskTime, boolean taskDone, boolean taskNotification, boolean taskAttachment,MyListAdapter adapter) {
+        this.taskTitle = taskTitle;
+        this.taskDescription = taskDescription;
+        this.taskDate = taskDate;
+        this.taskTime = taskTime;
+        this.taskDone = taskDone;
+        this.taskNotification = taskNotification;
+        this.taskAttachment = taskAttachment;
+        this.taskCategory = taskCategory;
+        this.adapter=adapter;
+
+    }
+    public Zadanie(Zadanie zadanie)
+    {
+        this.taskTitle = zadanie.taskTitle;
+        this.taskDescription = zadanie.taskDescription;
+        this.taskDate = zadanie.taskDate;
+        this.taskTime = zadanie.taskTime;
+        this.taskDone = zadanie.taskDone;
+        this.taskNotification = zadanie.taskNotification;
+        this.taskAttachment = zadanie.taskAttachment;
+        this.taskCategory = zadanie.taskCategory;
+        this.taskFiles=zadanie.taskFiles;
     }
     private void pickFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -148,11 +206,54 @@ public class Zadanie extends Fragment {
         FloatingActionButton fabCancel=view.findViewById(R.id.floatingActionButtonCancel);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivity);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        EditText taskTitleText= view.findViewById(R.id.taskTitleText);
+        EditText taskDescriptionText= view.findViewById(R.id.taskDescriptionText);
+        EditText editTextTime=view.findViewById(R.id.editTextTime);
+        TextView taskDateView=view.findViewById(R.id.taskDate);
+        Switch notificationSwitch=view.findViewById(R.id.notificationSwitch);
+        TextView doneStatus=view.findViewById(R.id.doneStatus);
+        Spinner categorySpinner=view.findViewById(R.id.categorySpinner);
+        taskTitleText.setText(taskTitle);
+        taskDescriptionText.setText(taskDescription);
+        editTextTime.setText(taskTime.toString());
+        DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        taskDateView.setText(formatter.format(taskDate));
+        notificationSwitch.setChecked(taskNotification);
+        doneStatus.setText(taskDone?"Zakończony":"Niezakończony");
+        categorySpinner.setSelection(CategorySelection.getPositionCategory(taskCategory,mainActivity));
+        Log.println(Log.INFO,"Zadanie",photoPath);
+        if(!Objects.equals(photoPath, ""))
+        {
+            File imageFile=new File(photoPath);
+            if(imageFile.exists()) {
+                ImageView attachmentPhoto = getView().findViewById(R.id.attachmentPhotoF);
+                attachmentPhoto.setImageURI(Uri.fromFile(imageFile));
+                attachmentPhoto.setVisibility(View.VISIBLE);
+            }
+            else{
+                photoPath="";
+                ImageView attachmentPhoto = getView().findViewById(R.id.attachmentPhotoF);
+                attachmentPhoto.setVisibility(View.INVISIBLE);
+                taskAttachment=false;
+            }
+
+        }
+
+
+
+        Zadanie thisZadanie=this;
 
         fabCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new MainActivityFragment()).commit();
+//                if(!adapter.isTaskExist(thisZadanie)) {
+//                    File imageFile=new File(photoPath);
+//                    if(imageFile.exists())
+//                        imageFile.delete();
+//                }
+
+
             }
         });
         FloatingActionButton fabUpload = view.findViewById(R.id.floatingActionButtonUpload);
@@ -168,8 +269,44 @@ public class Zadanie extends Fragment {
         fabSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.addZadanie(new Zadanie(taskTitle,taskDescription,taskCategory,taskDate,taskTime,taskDone,taskNotification,taskAttachment));
+                taskTitle=taskTitleText.getText().toString();
+                taskDescription=taskDescriptionText.getText().toString();
+                if(editTextTime.getText().toString().equals(""))
+                    taskTime=new Time(0,0,0);
+                else
+                    taskTime=new Time(Integer.parseInt(editTextTime.getText().toString().split(":")[0]),Integer.parseInt(editTextTime.getText().toString().split(":")[1]),Integer.parseInt(editTextTime.getText().toString().split(":")[2]));
+                taskDone=doneStatus.getText().toString().equals("Zakończony");
+                taskNotification=notificationSwitch.isChecked();
+                taskCategory=categorySpinner.getSelectedItem().toString();
+                File internalDir = getActivity().getFilesDir();
+                File outputFile=new File(internalDir, UUID.randomUUID().toString()+".jpg");
+                FileOutputStream out = null;
+                if(photoBitmap!=null)
+                    try {
+                        out = new FileOutputStream(outputFile);
+                        photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                        out.flush();
+                        out.close();
+                        photoPath=outputFile.getAbsolutePath();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                if(!adapter.isTaskExist(thisZadanie)) {
+                    taskDate=new Date();
+                    adapter.addZadanie(thisZadanie);
+                }
+                sendNotification();
+
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new MainActivityFragment()).commit();
+            }
+        });
+        ImageView attachmentPhoto=view.findViewById(R.id.attachmentPhotoF);
+        attachmentPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!photoPath.equals(""))
+                    getActivity().getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainerView3,new PhotoFragment(photoPath)).commit();
             }
         });
     }
@@ -215,7 +352,12 @@ public class Zadanie extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
 
+
+
         if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            File photoFile = new File(photoPath);
+            if(photoFile.exists())
+                photoFile.delete();
             Uri selectedImage = data.getData();
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
 
@@ -227,12 +369,22 @@ public class Zadanie extends Fragment {
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
 
-            Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
-            FragmentContainerView attachmentFragmentContainerView = getView().findViewById(R.id.attachmentContainerView);
-            attachmentFragmentContainerView.setVisibility(View.VISIBLE);
-            PhotoFragment ph=new PhotoFragment(bitmap);
+            photoBitmap = BitmapFactory.decodeFile(picturePath);
 
-            getActivity().getSupportFragmentManager().beginTransaction().replace(attachmentFragmentContainerView.getId(), ph).commit();
+
+            try {
+
+                ImageView attachmentPhoto=getView().findViewById(R.id.attachmentPhotoF);
+                attachmentPhoto.setImageBitmap(photoBitmap);
+                attachmentPhoto.setVisibility(View.VISIBLE);
+                taskAttachment=true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+
 
 
         }

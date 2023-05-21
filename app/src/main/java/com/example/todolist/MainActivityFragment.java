@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,8 +20,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Switch;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -44,6 +47,9 @@ public class MainActivityFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mainActivity = (MainActivity) context;
+        Log.d("MainActivityFragment", "onAttach: " + mainActivity);
+
+
 
     }
 
@@ -87,11 +93,35 @@ public class MainActivityFragment extends Fragment {
         menuCategory.setAdapter(adapterCategories);
         menuNotification.setAdapter(adapterNotification);
         FloatingActionButton fab = view.findViewById(R.id.floatingActionButton);
+        MainFragmentFragmentViewModel viewModel= new ViewModelProvider(mainActivity).get(MainFragmentFragmentViewModel.class);
+        menuCategory.setSelection(CategorySelection.getPositionCategories(viewModel.getCurrentCategory(),mainActivity));
+        Log.d("TAG", "onItemSelected: "+menuCategory.getSelectedItem().toString());
+        Switch switchDone = view.findViewById(R.id.switchDone);
+        switchDone.setChecked(viewModel.getSortDoneTasks());
+        switchDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            viewModel.setSortDoneTasks(isChecked);
+            listAdapter.setSortDoneTasks(isChecked);
+        });
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new Zadanie(listAdapter)).commit();
+            }
+        });
+
+        menuCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                listAdapter.setCurrentCategory(menuCategory.getSelectedItem().toString());
+                Log.d("TAG", "onItemSelected: "+menuCategory.getSelectedItem().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 

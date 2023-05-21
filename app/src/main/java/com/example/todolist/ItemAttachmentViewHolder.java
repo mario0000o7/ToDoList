@@ -13,7 +13,7 @@ public class ItemAttachmentViewHolder extends RecyclerView.ViewHolder{
 
     public ItemAttachmentViewHolder(@NonNull View itemView, MainActivity mainActivity) {
         super(itemView);
-        imageView = itemView.findViewById(R.id.attachmentPhoto);
+        imageView = itemView.findViewById(R.id.attachmentPhotoF);
     }
 
     public void setMainActivity(MainActivity mainActivity) {

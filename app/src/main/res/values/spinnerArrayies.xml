@@ -17,6 +17,12 @@
         <item>2 godz</item>
         <item>3 godz</item>
     </string-array>
+    <string-array name="category">
+        <item>Praca</item>
+        <item>Dom</item>
+        <item>Zakupy</item>
+        <item>Inne</item>
+    </string-array>
 
 
 </resources>

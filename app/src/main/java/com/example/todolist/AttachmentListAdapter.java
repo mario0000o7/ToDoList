@@ -27,7 +27,6 @@ public class AttachmentListAdapter extends RecyclerView.Adapter<ItemAttachmentVi
 
     @Override
     public void onBindViewHolder(@NonNull ItemAttachmentViewHolder holder, int position) {
-        holder.setImageView(photos.get(position).getPhoto());
 
     }
     public void addPhoto(PhotoFragment photo){

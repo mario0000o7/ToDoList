@@ -67,12 +67,12 @@
                 android:layout_weight="8"
                 android:text="Kategoria:" />
 
-            <TextView
-                android:id="@+id/textView15"
+            <Spinner
+                android:id="@+id/categorySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:text="Sport" />
+                android:entries="@array/category" />
         </LinearLayout>
 
         <LinearLayout
@@ -89,7 +89,7 @@
                 android:text="Status:" />
 
             <TextView
-                android:id="@+id/textView18"
+                android:id="@+id/doneStatus"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
@@ -105,7 +105,7 @@
             android:orientation="horizontal">
 
             <Switch
-                android:id="@+id/switch2"
+                android:id="@+id/notificationSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Powiadomienie: " />
@@ -170,14 +170,23 @@
                 android:layout_weight="8"
                 android:text="Załączniki:" />
 
+            <ImageView
+                android:id="@+id/attachmentPhotoF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:visibility="invisible"
+                tools:src="@tools:sample/avatars" />
+
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/attachmentContainerView"
                 android:name="com.example.todolist.PhotoFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:visibility="invisible"
-                tools:layout="@layout/fragment_photo" />
+                android:visibility="gone"
+                tools:layout="@layout/fragment_photo"
+                tools:visibility="gone" />
 
         </LinearLayout>
 
