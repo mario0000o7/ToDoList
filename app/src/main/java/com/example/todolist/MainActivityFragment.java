@@ -2,6 +2,7 @@ package com.example.todolist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Switch;
 
@@ -79,6 +81,8 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        SharedPreferences sharedPreferences = mainActivity.getSharedPreferences("com.example.todolist", Context.MODE_PRIVATE);
+
         MyListAdapter listAdapter = new MyListAdapter(mainActivity);
         RecyclerView taskList = view.findViewById(R.id.taskList);
         taskList.setAdapter(listAdapter);
@@ -94,14 +98,57 @@ public class MainActivityFragment extends Fragment {
         menuNotification.setAdapter(adapterNotification);
         FloatingActionButton fab = view.findViewById(R.id.floatingActionButton);
         MainFragmentFragmentViewModel viewModel= new ViewModelProvider(mainActivity).get(MainFragmentFragmentViewModel.class);
+        viewModel.setCurrentNotification(sharedPreferences.getString("currentNotification","Wyłącz"));
+        sharedPreferences.edit().apply();
         menuCategory.setSelection(CategorySelection.getPositionCategories(viewModel.getCurrentCategory(),mainActivity));
         Log.d("TAG", "onItemSelected: "+menuCategory.getSelectedItem().toString());
         Switch switchDone = view.findViewById(R.id.switchDone);
+
+        SearchView searchView = view.findViewById(R.id.searchTask);
+
         switchDone.setChecked(viewModel.getSortDoneTasks());
         switchDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
             viewModel.setSortDoneTasks(isChecked);
             listAdapter.setSortDoneTasks(isChecked);
         });
+
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                              @Override
+                                              public boolean onQueryTextSubmit(String query) {
+                                                  listAdapter.searchTask(query);
+                                                  return false;
+                                              }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                                          @Override
+                                          public boolean onClose() {
+                                              listAdapter.searchTask("");
+                                              return false;
+                                          }
+                                      });
+
+
+        menuNotification.setSelection(CategorySelection.getNotificationPosition(viewModel.getCurrentNotification(),mainActivity));
+        menuNotification.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                                       @Override
+                                                       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                           viewModel.setCurrentNotification(menuNotification.getSelectedItem().toString());
+                                                           listAdapter.setCurrentNotification(menuNotification.getSelectedItem().toString());
+                                                       }
+
+                                                       @Override
+                                                       public void onNothingSelected(AdapterView<?> adapterView) {
+
+                                                       }
+                                                   });
+
+
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

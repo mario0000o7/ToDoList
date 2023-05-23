@@ -10,12 +10,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.provider.MediaStore;
@@ -28,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -38,8 +41,10 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -49,7 +54,6 @@ import java.util.UUID;
  */
 public class Zadanie extends Fragment {
     private static final int REQUEST_CODE_PICK_IMAGE = 1;
-    private static final int REQUEST_CODE_SAVE_IMAGE = 2;
     private static final int REQUEST_CODE_PICK_FILE = 1;
 
 
@@ -69,9 +73,7 @@ public class Zadanie extends Fragment {
     MyListAdapter adapter;
     String photoPath="";
     Bitmap photoBitmap=null;
-    PendingIntent pendingIntentNotification;
-    private int notificationID;
-
+    int notificationID=UUID.randomUUID().hashCode();
 
 
     public Zadanie() {
@@ -82,21 +84,52 @@ public class Zadanie extends Fragment {
     }
 
 
+    public void checkIsDone(){
+        if(taskDate.getTime()+taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000<new Date().getTime()) {
+//            Log.d("Zadanie", "checkIsDone: "+taskTitle);
+//            Log.d("Zadanie", "checkIsDone: "+taskTime.getHours()+" "+taskTime.getMinutes()+" "+taskTime.getSeconds());
+//            Log.d("Zadanie", "checkIsDone: "+taskDate.getTime()+" "+taskTime.getTime()+" "+new Date().getTime());
+            taskDone = true;
+            MyDatabase db = MyDatabase.getInstance();
+            db.updateTask(this);
+
+        }
+    }
+
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mainActivity = (MainActivity) context;
     }
 
-    public void sendNotification(){
+    public void sendNotification(int timeBeforeDone){
+        if(taskDone||mainActivity==null)
+            return;
         Log.d("Zadanie", "sendNotification: "+taskTitle+mainActivity.toString());
         Intent notificationIntent = new Intent(mainActivity, NotificationReceiver.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notificationIntent.putExtra("Title", taskTitle);
-        notificationIntent.putExtra("Message", "Zadanie z kategorii: "+taskCategory+" o terminie: "+taskDate+" "+taskTime);
-        notificationID=UUID.randomUUID().hashCode();
-        notificationIntent.putExtra("ID",  notificationID);
-        pendingIntentNotification = PendingIntent.getBroadcast(
+        if(taskNotification)
+            notificationIntent.putExtra("Status", true);
+        else
+            notificationIntent.putExtra("Status", false);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(taskDate);
+        Log.d("Calendar", "sendNotification: "+calendar.getTime().toString());
+
+// Get the time zone of the device
+        TimeZone deviceTimeZone = TimeZone.getDefault();
+
+// Set the time zone of the calendar to the device's time zone
+        calendar.setTimeZone(deviceTimeZone);
+
+// Get the date in the local time zone
+        Date localDate = calendar.getTime();
+        Log.d("Zadanie", "sendNotification: "+localDate.toString());
+        notificationIntent.putExtra("Message", "Zadanie z kategorii: "+taskCategory+" o terminie: "+localDate+" "+taskTime);
+        notificationIntent.putExtra("ID", notificationID);
+        PendingIntent pendingIntentNotification = PendingIntent.getBroadcast(
                 mainActivity,
                 notificationID,
                 notificationIntent,
@@ -104,9 +137,31 @@ public class Zadanie extends Fragment {
         );
 
         AlarmManager alarmManager = (AlarmManager) mainActivity.getSystemService(Context.ALARM_SERVICE);
-        long time = taskDate.getTime() + taskTime.getTime();
+        long time = taskDate.getTime() + taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000-timeBeforeDone*1000;
+        if(time<new Date().getTime())
+            time=taskDate.getTime() + taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000;
+        Log.d("Zadanie","taskDate: "+new Date(taskDate.getTime()+taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000));
+        Log.d("Zadanie","time: "+new Date(time).toString());
+        Log.d("Zadanie", "sendNotification: "+time);
         alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntentNotification);
 
+    }
+
+    public void cancelNotification(){
+        if(taskDone||!taskNotification||mainActivity==null)
+            return;
+        PendingIntent pendingIntentNotification = PendingIntent.getBroadcast(
+                mainActivity,
+                notificationID,
+                new Intent(mainActivity, NotificationReceiver.class),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        AlarmManager alarmManager = (AlarmManager) mainActivity.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntentNotification);
+    }
+    public void changeNotification(int timeBeforeDone){
+        cancelNotification();
+        sendNotification(timeBeforeDone);
     }
 
     @Override
@@ -215,11 +270,22 @@ public class Zadanie extends Fragment {
         Spinner categorySpinner=view.findViewById(R.id.categorySpinner);
         taskTitleText.setText(taskTitle);
         taskDescriptionText.setText(taskDescription);
-        editTextTime.setText(taskTime.toString());
         DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
         taskDateView.setText(formatter.format(taskDate));
         notificationSwitch.setChecked(taskNotification);
         doneStatus.setText(taskDone?"Zakończony":"Niezakończony");
+        if(taskDone) {
+            doneStatus.setTextColor(Color.GREEN);
+            editTextTime.setEnabled(false);
+            notificationSwitch.setEnabled(false);
+        }
+        else {
+            doneStatus.setTextColor(Color.RED);
+
+        }
+
+        editTextTime.setText(taskTime.toString());
+
         categorySpinner.setSelection(CategorySelection.getPositionCategory(taskCategory,mainActivity));
         Log.println(Log.INFO,"Zadanie",photoPath);
         if(!Objects.equals(photoPath, ""))
@@ -246,6 +312,8 @@ public class Zadanie extends Fragment {
         fabCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                adapter.sortDoneTasks();
+
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new MainActivityFragment()).commit();
 //                if(!adapter.isTaskExist(thisZadanie)) {
 //                    File imageFile=new File(photoPath);
@@ -269,13 +337,31 @@ public class Zadanie extends Fragment {
         fabSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(taskTitleText.getText().toString().equals(""))
+                {
+                    Toast.makeText(mainActivity,"Wprowadź tytuł zadania",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(taskDescriptionText.getText().toString().equals(""))
+                {
+                    Toast.makeText(mainActivity,"Wprowadź opis zadania",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 taskTitle=taskTitleText.getText().toString();
                 taskDescription=taskDescriptionText.getText().toString();
                 if(editTextTime.getText().toString().equals(""))
                     taskTime=new Time(0,0,0);
-                else
-                    taskTime=new Time(Integer.parseInt(editTextTime.getText().toString().split(":")[0]),Integer.parseInt(editTextTime.getText().toString().split(":")[1]),Integer.parseInt(editTextTime.getText().toString().split(":")[2]));
-                taskDone=doneStatus.getText().toString().equals("Zakończony");
+                else {
+                    try {
+                        taskTime = new Time(Integer.parseInt(editTextTime.getText().toString().split(":")[0]), Integer.parseInt(editTextTime.getText().toString().split(":")[1]), Integer.parseInt(editTextTime.getText().toString().split(":")[2]));
+
+                    }
+                    catch (Exception e)
+                    {
+                        Toast.makeText(mainActivity,"Wprowadź poprawny format czasu",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }                taskDone=doneStatus.getText().toString().equals("Zakończony");
                 taskNotification=notificationSwitch.isChecked();
                 taskCategory=categorySpinner.getSelectedItem().toString();
                 File internalDir = getActivity().getFilesDir();
@@ -291,12 +377,20 @@ public class Zadanie extends Fragment {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+                Log.d("Zadanie adapter",adapter.toString());
 
                 if(!adapter.isTaskExist(thisZadanie)) {
                     taskDate=new Date();
+                    Log.d("Zadanie",mainActivity.toString());
                     adapter.addZadanie(thisZadanie);
                 }
-                sendNotification();
+                else
+                {
+                    MyDatabase db=MyDatabase.getInstance();
+                    db.updateTask(thisZadanie);
+                    adapter.sortDoneTasks();
+                }
+                sendNotification(MainFragmentFragmentViewModel.notificationToTime(adapter.getCurrentNotification()));
 
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView3,new MainActivityFragment()).commit();
             }
@@ -345,6 +439,19 @@ public class Zadanie extends Fragment {
     }
     public ArrayList<File> getTaskFiles() {
         return taskFiles;
+    }
+
+    public void display(){
+        Log.println(Log.INFO,"Zadanie",taskTitle);
+        Log.println(Log.INFO,"Zadanie",taskDescription);
+        Log.println(Log.INFO,"Zadanie",taskTime.toString());
+        Log.println(Log.INFO,"Zadanie",taskDate.toString());
+        Log.println(Log.INFO,"Zadanie",taskNotification?"true":"false");
+        Log.println(Log.INFO,"Zadanie",taskDone?"true":"false");
+        Log.println(Log.INFO,"Zadanie",taskCategory);
+        Log.println(Log.INFO,"Zadanie",photoPath);
+        Log.println(Log.INFO,"Zadanie",taskAttachment?"true":"false");
+        Log.println(Log.INFO,"Zadanie",taskFiles.toString());
     }
 
     @Override

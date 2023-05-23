@@ -1,5 +1,6 @@
 package com.example.todolist;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
@@ -46,6 +47,7 @@ public class ItemZadaniaViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void setMyListAdapter(MyListAdapter myListAdapter) {
+        Log.d("SetMyListAdapter","SetMyListAdapter");
         this.myListAdapter = myListAdapter;
         FrameLayout mainFrame = itemView.findViewById(R.id.mainFrame);
         mainFrame.setOnClickListener(new View.OnClickListener() {
@@ -85,8 +87,8 @@ public class ItemZadaniaViewHolder extends RecyclerView.ViewHolder {
         this.taskStatus.setChecked(taskStatus);
     }
 
-    public void setTaskTime(Time taskTime) {
-        this.taskTime.setText(taskTime.toString());
+    public void setTaskTime(Time taskTime, Date taskDate) {
+        this.taskTime.setText(new SimpleDateFormat("HH:mm").format(new Date(taskDate.getTime() + taskTime.getHours()*60*60*1000 + taskTime.getMinutes()*60*1000 + taskTime.getSeconds()*1000)));
     }
     public void setTaskCategory(String taskCategory){
         this.taskCategory.setText(taskCategory);
