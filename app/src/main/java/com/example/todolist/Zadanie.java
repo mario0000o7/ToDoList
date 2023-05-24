@@ -138,8 +138,18 @@ public class Zadanie extends Fragment {
 
         AlarmManager alarmManager = (AlarmManager) mainActivity.getSystemService(Context.ALARM_SERVICE);
         long time = taskDate.getTime() + taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000-timeBeforeDone*1000;
+        Log.d("taskTime", "sendNotification: "+taskTime.getHours()+" "+taskTime.getMinutes()+" "+taskTime.getSeconds());
+        if(taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000==0) {
+            time = taskDate.getTime() +1000;
+            Log.d("Zadanie", "sendNotification==0: "+time);
+        }
         if(time<new Date().getTime())
             time=taskDate.getTime() + taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000;
+        if(taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000-timeBeforeDone*1000==0) {
+            time = taskDate.getTime() +1000;
+            Log.d("Zadanie", "sendNotification==0: "+time);
+        }
+
         Log.d("Zadanie","taskDate: "+new Date(taskDate.getTime()+taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000));
         Log.d("Zadanie","time: "+new Date(time).toString());
         Log.d("Zadanie", "sendNotification: "+time);
@@ -350,7 +360,7 @@ public class Zadanie extends Fragment {
                 taskTitle=taskTitleText.getText().toString();
                 taskDescription=taskDescriptionText.getText().toString();
                 if(editTextTime.getText().toString().equals(""))
-                    taskTime=new Time(0,0,0);
+                    taskTime=new Time(0,0,1);
                 else {
                     try {
                         taskTime = new Time(Integer.parseInt(editTextTime.getText().toString().split(":")[0]), Integer.parseInt(editTextTime.getText().toString().split(":")[1]), Integer.parseInt(editTextTime.getText().toString().split(":")[2]));
@@ -361,7 +371,10 @@ public class Zadanie extends Fragment {
                         Toast.makeText(mainActivity,"Wprowadź poprawny format czasu",Toast.LENGTH_SHORT).show();
                         return;
                     }
-                }                taskDone=doneStatus.getText().toString().equals("Zakończony");
+                }
+                if(editTextTime.getText().toString().equals("00:00:00"))
+                    taskTime=new Time(0,0,1);
+                taskDone=doneStatus.getText().toString().equals("Zakończony");
                 taskNotification=notificationSwitch.isChecked();
                 taskCategory=categorySpinner.getSelectedItem().toString();
                 File internalDir = getActivity().getFilesDir();
