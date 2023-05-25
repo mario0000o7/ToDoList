@@ -39,7 +39,9 @@
                     android:layout_weight="1"
                     android:text="09.05.2023"
                     android:textAlignment="textEnd"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    tools:visibility="gone" />
 
                 <TextView
                     android:id="@+id/taskTime"

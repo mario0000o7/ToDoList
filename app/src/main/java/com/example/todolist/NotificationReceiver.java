@@ -33,7 +33,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         String notification = sharedPreferences.getString("currentNotification", "Wyłącz");
         Log.d("NotificationReceiver", "onReceive: " + notification);
 
-        myListAdapter.checkIsDoneZadania();
+//        myListAdapter.checkIsDoneZadania();
         myListAdapter.sortDoneTasks();
         if (notification.equals("Wyłącz")) {
             return;

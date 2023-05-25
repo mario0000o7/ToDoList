@@ -51,7 +51,7 @@ public class MyDatabase {
             values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE, zadanie.taskTitle);
             values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DESCRIPTION, zadanie.taskDescription);
             values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DATE, zadanie.taskDate.getTime());
-            values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TIME, zadanie.taskTime.getHours() * 3600000 + zadanie.taskTime.getMinutes() * 60000 + zadanie.taskTime.getSeconds() * 1000);
+            values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TIME, zadanie.taskTime.getTime());
             values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_ATTACHMENT, zadanie.taskAttachment);
             values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_STATUS, zadanie.taskDone);
             values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_NOTIFICATION, zadanie.taskNotification);
@@ -81,7 +81,7 @@ public class MyDatabase {
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE, zadanie.taskTitle);
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DESCRIPTION, zadanie.taskDescription);
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DATE, zadanie.taskDate.getTime());
-        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TIME, zadanie.taskTime.getHours() * 3600000 + zadanie.taskTime.getMinutes() * 60000 + zadanie.taskTime.getSeconds() * 1000);
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_TIME, zadanie.taskTime.getTime());
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_ATTACHMENT, zadanie.taskAttachment);
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_STATUS, zadanie.taskDone);
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_NOTIFICATION, zadanie.taskNotification);
@@ -137,7 +137,7 @@ public class MyDatabase {
             task.taskDate = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_DATE)));
             Log.d("taskDate", String.valueOf(task.taskDate.getTime()));
             long time = cursor.getLong(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_TIME));
-            task.taskTime = new Time((int) (time / 3600000), (int) (time % 3600000 / 60000), (int) (time % 3600000 % 60000 / 1000));
+            task.taskTime = new Date(time);
 //            task.taskTime = new Time(cursor.getLong(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_TIME)));
             task.taskAttachment = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_ATTACHMENT))==1;
             task.taskDone = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_STATUS)) == 1;
@@ -180,7 +180,7 @@ public class MyDatabase {
                 tmp.taskTitle = cursor.getString(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE));
                 tmp.taskDescription = cursor.getString(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_DESCRIPTION));
                 tmp.taskDate = new Date(taskDate);
-                tmp.taskTime = new Time(taskTime);
+                tmp.taskTime = new Date(taskTime);
                 tmp.taskAttachment = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_ATTACHMENT))==1;
                 tmp.taskDone = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_STATUS)) == 1;
                 tmp.taskNotification = cursor.getInt(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_NOTIFICATION)) == 1;

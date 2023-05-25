@@ -25,11 +25,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -62,7 +65,7 @@ public class Zadanie extends Fragment {
     String taskTitle="Brak tytułu";
     String taskDescription="Brak opisu";
     Date taskDate=new Date();
-    Time taskTime=new Time(0,0,0);
+    Date taskTime=new Date();
     int taskPriority=0;
     boolean taskDone=false;
     boolean taskNotification=false;
@@ -118,13 +121,10 @@ public class Zadanie extends Fragment {
         calendar.setTime(taskDate);
         Log.d("Calendar", "sendNotification: "+calendar.getTime().toString());
 
-// Get the time zone of the device
         TimeZone deviceTimeZone = TimeZone.getDefault();
 
-// Set the time zone of the calendar to the device's time zone
         calendar.setTimeZone(deviceTimeZone);
 
-// Get the date in the local time zone
         Date localDate = calendar.getTime();
         Log.d("Zadanie", "sendNotification: "+localDate.toString());
         notificationIntent.putExtra("Message", "Zadanie z kategorii: "+taskCategory+" o terminie: "+localDate+" "+taskTime);
@@ -137,18 +137,8 @@ public class Zadanie extends Fragment {
         );
 
         AlarmManager alarmManager = (AlarmManager) mainActivity.getSystemService(Context.ALARM_SERVICE);
-        long time = taskDate.getTime() + taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000-timeBeforeDone*1000;
-        Log.d("taskTime", "sendNotification: "+taskTime.getHours()+" "+taskTime.getMinutes()+" "+taskTime.getSeconds());
-        if(taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000==0) {
-            time = taskDate.getTime() +1000;
-            Log.d("Zadanie", "sendNotification==0: "+time);
-        }
-        if(time<new Date().getTime())
-            time=taskDate.getTime() + taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000;
-        if(taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000-timeBeforeDone*1000==0) {
-            time = taskDate.getTime() +1000;
-            Log.d("Zadanie", "sendNotification==0: "+time);
-        }
+        long time = taskTime.getTime()-timeBeforeDone*1000;
+
 
         Log.d("Zadanie","taskDate: "+new Date(taskDate.getTime()+taskTime.getHours()*3600000+taskTime.getMinutes()*60000+taskTime.getSeconds()*1000));
         Log.d("Zadanie","time: "+new Date(time).toString());
@@ -273,9 +263,12 @@ public class Zadanie extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         EditText taskTitleText= view.findViewById(R.id.taskTitleText);
         EditText taskDescriptionText= view.findViewById(R.id.taskDescriptionText);
-        EditText editTextTime=view.findViewById(R.id.editTextTime);
+//        EditText editTextTime=view.findViewById(R.id.editTextTime);
+        DatePicker taskDatePicker= view.findViewById(R.id.dataPicker);
+        TimePicker taskTimePicker= view.findViewById(R.id.dataPicker2);
         TextView taskDateView=view.findViewById(R.id.taskDate);
         Switch notificationSwitch=view.findViewById(R.id.notificationSwitch);
+        Switch statusSwtich=view.findViewById(R.id.statusSwitch);
         TextView doneStatus=view.findViewById(R.id.doneStatus);
         Spinner categorySpinner=view.findViewById(R.id.categorySpinner);
         taskTitleText.setText(taskTitle);
@@ -286,15 +279,20 @@ public class Zadanie extends Fragment {
         doneStatus.setText(taskDone?"Zakończony":"Niezakończony");
         if(taskDone) {
             doneStatus.setTextColor(Color.GREEN);
-            editTextTime.setEnabled(false);
+            taskDatePicker.setEnabled(false);
             notificationSwitch.setEnabled(false);
+            statusSwtich.setChecked(true);
+            statusSwtich.setEnabled(false);
+            taskTimePicker.setEnabled(false);
         }
         else {
             doneStatus.setTextColor(Color.RED);
 
         }
 
-        editTextTime.setText(taskTime.toString());
+        taskDatePicker.setMinDate(System.currentTimeMillis());
+        taskTimePicker.setIs24HourView(true);
+        taskTimePicker.setHour(taskTime.getHours());
 
         categorySpinner.setSelection(CategorySelection.getPositionCategory(taskCategory,mainActivity));
         Log.println(Log.INFO,"Zadanie",photoPath);
@@ -357,24 +355,16 @@ public class Zadanie extends Fragment {
                     Toast.makeText(mainActivity,"Wprowadź opis zadania",Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 taskTitle=taskTitleText.getText().toString();
                 taskDescription=taskDescriptionText.getText().toString();
-                if(editTextTime.getText().toString().equals(""))
-                    taskTime=new Time(0,0,1);
-                else {
-                    try {
-                        taskTime = new Time(Integer.parseInt(editTextTime.getText().toString().split(":")[0]), Integer.parseInt(editTextTime.getText().toString().split(":")[1]), Integer.parseInt(editTextTime.getText().toString().split(":")[2]));
+                taskTime=new GregorianCalendar(taskDatePicker.getYear(),taskDatePicker.getMonth(),taskDatePicker.getDayOfMonth()).getTime();
+                taskTime.setHours(taskTimePicker.getHour());
+                taskTime.setMinutes(taskTimePicker.getMinute());
+                Log.d("Zadanie picker",taskTime.toString());
 
-                    }
-                    catch (Exception e)
-                    {
-                        Toast.makeText(mainActivity,"Wprowadź poprawny format czasu",Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-                if(editTextTime.getText().toString().equals("00:00:00"))
-                    taskTime=new Time(0,0,1);
-                taskDone=doneStatus.getText().toString().equals("Zakończony");
+
+                taskDone=statusSwtich.isChecked();
                 taskNotification=notificationSwitch.isChecked();
                 taskCategory=categorySpinner.getSelectedItem().toString();
                 File internalDir = getActivity().getFilesDir();
@@ -438,7 +428,7 @@ public class Zadanie extends Fragment {
         return taskTitle;
     }
 
-    public Time getTaskTime() {
+    public Date getTaskTime() {
         return taskTime;
     }
     public boolean getTaskDone() {

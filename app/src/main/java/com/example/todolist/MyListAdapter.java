@@ -51,24 +51,28 @@ public class MyListAdapter extends RecyclerView.Adapter<ItemZadaniaViewHolder>{
 
     public void searchTask(String query){
         if(query.equals("")){
-            zadania=MyDatabase.getInstance().getTasks();
-            sortListByCategory(currentCategory);
-            sortDoneTasks();
+//            sortListByCategory(currentCategory);
             sortTimeASC();
-            notifyDataSetChanged();
+
+            sortDoneTasks();
+//            notifyDataSetChanged();
             return;
         }
-        zadania=MyDatabase.getInstance().getTasks();
-        zadania=zadania.stream().filter(zadanie -> zadanie.getTaskTitle().toLowerCase().contains(query.toLowerCase())).collect(Collectors.toCollection(ArrayList::new));
-        sortListByCategory(currentCategory);
-        sortDoneTasks();
         sortTimeASC();
-        notifyDataSetChanged();
+        zadaniaSort = new ArrayList<>();
+        for(Zadanie zadanie:zadania){
+
+            if(zadanie.getTaskTitle().toLowerCase().contains(query.toLowerCase())&&zadanie.taskDone==sortDoneTasks){
+                zadaniaSort.add(zadanie);
+                notifyDataSetChanged();
+            }
+        }
+//        notifyDataSetChanged();
     }
 
     public void sortTimeASC(){
         zadania.sort((o1, o2) -> o1.getTaskTime().compareTo(o2.getTaskTime()));
-        checkIsDoneZadania();
+//        checkIsDoneZadania();
     }
 
     public void checkIsDoneZadania(){

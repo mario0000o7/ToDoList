@@ -87,8 +87,10 @@ public class ItemZadaniaViewHolder extends RecyclerView.ViewHolder {
         this.taskStatus.setChecked(taskStatus);
     }
 
-    public void setTaskTime(Time taskTime, Date taskDate) {
-        this.taskTime.setText(new SimpleDateFormat("HH:mm").format(new Date(taskDate.getTime() + taskTime.getHours()*60*60*1000 + taskTime.getMinutes()*60*1000 + taskTime.getSeconds()*1000)));
+    public void setTaskTime(Date taskTime, Date taskDate) {
+        Log.d("SetTaskTime",taskTime.toString());
+
+        this.taskTime.setText(new SimpleDateFormat("dd.MM.yyyy HH:mm").format(taskTime));
     }
     public void setTaskCategory(String taskCategory){
         this.taskCategory.setText(taskCategory);
